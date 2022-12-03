@@ -3,7 +3,7 @@ import promptApi from 'prompt-sync'
 import { MFO, VertexType } from './types'
 import { VertexList } from './vertex-list'
 import { El } from './element'
-import { MenuMessages } from './enums'
+import { MAX_LINK_COUNT, MAX_VERTEX_COUNT, MenuMessages, VERTEX_LINK_DIFFERENCE } from './enums'
 const prompt = promptApi({ sigint: true })
 
 const stringToArrNumber = (s?: string): number[] => (s === '' ? [] : (s?.split(' ').map((el) => Number(el)) as number[]))
@@ -13,6 +13,9 @@ const createVertex = (vertexInput: VertexType): Vertex => {
   addChild(parentVertex, vertexInput.linked)
   return parentVertex
 }
+
+const isCorrectInputs = ({ G, P }: MFO, genLinks: number): boolean =>
+  genLinks - P.length === VERTEX_LINK_DIFFERENCE && genLinks < MAX_LINK_COUNT && P.length < MAX_VERTEX_COUNT
 
 const addChild = (parent: Vertex, names: number[]): Vertex | undefined => {
   return (function setNext(previous?: Vertex) {
@@ -33,6 +36,7 @@ const printAllInputs = ({ G }: Partial<MFO>): ((p: Partial<MFO>) => void) => {
 const addVertex = ({ G, P }: MFO): void => {
   const graph: VertexList = new VertexList()
   const generalLinked = G.map(({ linked }) => linked).flat()
+  if (!isCorrectInputs({ G, P }, generalLinked.length)) throw new Error('invalid input!!')
 
   for (let i = 0, k = 0; k < P.length; ++i, ++k) {
     if (i + 1 !== G[i].vertex) k = G[i].vertex - 1

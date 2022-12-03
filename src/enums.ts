@@ -6,4 +6,10 @@ enum MenuMessages {
   MANUALLY_OR_AUTO = 'do you wanna input data manually or from file? '
 }
 
-export { MenuMessages }
+const VERTEX_LINK_DIFFERENCE = 2
+
+const MAX_VERTEX_COUNT = 20
+
+const MAX_LINK_COUNT = 50
+
+export { MenuMessages, VERTEX_LINK_DIFFERENCE, MAX_LINK_COUNT, MAX_VERTEX_COUNT }
