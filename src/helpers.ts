@@ -3,7 +3,7 @@ import promptApi from 'prompt-sync'
 import { MFO, VertexType } from './types'
 import { VertexList } from './vertex-list'
 import { El } from './element'
-import { MAX_LINK_COUNT, MAX_VERTEX_COUNT, MenuMessages, VERTEX_LINK_DIFFERENCE } from './enums'
+import { ConsoleMessages, MAX_LINK_COUNT, MAX_VERTEX_COUNT, MenuMessages, VERTEX_LINK_DIFFERENCE } from './enums'
 const prompt = promptApi({ sigint: true })
 
 const stringToArrNumber = (s?: string): number[] => (s === '' ? [] : (s?.split(' ').map((el) => Number(el)) as number[]))
@@ -14,7 +14,7 @@ const createVertex = (vertexInput: VertexType): Vertex => {
   return parentVertex
 }
 
-const isCorrectInputs = ({ G, P }: MFO, genLinks: number): boolean =>
+const isCorrectInputs = ({ P }: MFO, genLinks: number): boolean =>
   genLinks - P.length === VERTEX_LINK_DIFFERENCE && genLinks < MAX_LINK_COUNT && P.length < MAX_VERTEX_COUNT
 
 const addChild = (parent: Vertex, names: number[]): Vertex | undefined => {
@@ -27,21 +27,24 @@ const addChild = (parent: Vertex, names: number[]): Vertex | undefined => {
   })(parent)
 }
 
-const printAllInputs = ({ G }: Partial<MFO>): ((p: Partial<MFO>) => void) => {
-  console.warn('INPUTS ====>')
-  console.table(G)
-  return ({ P }: Partial<MFO>) => console.table(P)
+const printTable = <T extends object | any[]>(res: T, msg = ConsoleMessages.G_ARRAY): void => {
+  console.log(msg)
+  console.table(res)
+}
+
+const fillGap = ({ G }: MFO) => {
+  for (let i = 1; i < G.length; i++) if (G[i].vertex - G[i - 1].vertex !== 1) G.splice(i, 0, { linked: [], vertex: G[i - 1].vertex + 1 })
 }
 
 const addVertex = ({ G, P }: MFO): void => {
   const graph: VertexList = new VertexList()
   const generalLinked = G.map(({ linked }) => linked).flat()
-  if (!isCorrectInputs({ G, P }, generalLinked.length)) throw new Error('invalid input!!')
+  if (!isCorrectInputs({ G, P }, generalLinked.length)) throw new Error('invalid input!!!')
+  if (P.length !== G.length) fillGap({ G, P })
 
   for (let i = 0, k = 0; k < P.length; ++i, ++k) {
-    if (i + 1 !== G[i].vertex) k = G[i].vertex - 1
-    if (G[i].linked.at(-1) !== generalLinked[P[k] - 1])
-      throw new Error(`wrong P array at index ${i}; elements ${(G[i].linked.at(-1), generalLinked[P[k] - 1])}`)
+    const isWrongLinked: boolean = !!(G[i].linked.length && G[i].linked.sort((a, b) => a - b).at(-1) !== generalLinked[P[k] - 1])
+    if (isWrongLinked) throw new Error(`wrong P array at index ${i}; elements ${G[i].linked.at(-1)} ${generalLinked[P[k] - 1]}`)
     const newElement = new El(createVertex(G[i]))
     graph.list.at(-1)?.addNext(newElement)
     graph.Add(newElement)
@@ -54,8 +57,8 @@ const inputGManually = (res: MFO, count: number) => {
   for (let vertex = 1; vertex <= count; vertex++) {
     const linked: number[] = stringToArrNumber(prompt(`${MenuMessages.NAME_OF_VERTEX} ${vertex}: `)!)
     const newVertex: VertexType = { vertex, linked }
-    if (linked.length > 0) res.G.push(newVertex)
+    res.G.push(newVertex)
   }
 }
 
-export { addVertex, printAllInputs, stringToArrNumber, inputGManually }
+export { addVertex, printTable, stringToArrNumber, inputGManually }

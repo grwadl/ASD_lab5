@@ -1,4 +1,6 @@
 import { El } from './element'
+import { ConsoleMessages } from './enums'
+import { printTable } from './helpers'
 
 class VertexList {
   list: El[] = []
@@ -8,7 +10,8 @@ class VertexList {
   }
 
   ToInnerStringOutput(): void {
-    return this.list.forEach((el) => console.table(el.toString()))
+    const toOutput = this.list.map((el) => el.toString())
+    printTable(toOutput, ConsoleMessages.RESULT)
   }
 }
 

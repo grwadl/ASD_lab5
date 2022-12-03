@@ -25,7 +25,7 @@ class El {
       res.childLinkedSubList.push(current.left.name)
       current = current.left
     }
-    return { ...res, childLinkedSubList: res.childLinkedSubList.join('=>'), next: this.#next.vertex.name }
+    return { ...res, childLinkedSubList: res.childLinkedSubList.join('=>') || null, next: this.#next.vertex.name }
   }
 }
 
