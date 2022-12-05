@@ -4,8 +4,8 @@ interface VertexType {
 }
 
 type MFO = {
-  G: VertexType[]
-  P: number[]
+  main: VertexType[]
+  additional: number[]
 }
 
 type ResultOutput = {

@@ -10,14 +10,14 @@ const stringToArrNumber = (s?: string): number[] => (s === '' ? [] : (s?.split('
 
 const createVertex = (vertexInput: VertexType): Vertex => {
   const parentVertex = new Vertex(vertexInput.vertex)
-  addChild(parentVertex, vertexInput.linked)
+  addLinkedVertex(parentVertex, vertexInput.linked)
   return parentVertex
 }
 
-const isCorrectInputs = ({ P }: MFO, genLinks: number): boolean =>
-  genLinks - P.length === VERTEX_LINK_DIFFERENCE && genLinks < MAX_LINK_COUNT && P.length < MAX_VERTEX_COUNT
+const isCorrectInputs = ({ additional }: MFO, genLinks: number): boolean =>
+  genLinks - additional.length === VERTEX_LINK_DIFFERENCE && genLinks < MAX_LINK_COUNT && additional.length < MAX_VERTEX_COUNT
 
-const addChild = (parent: Vertex, names: number[]): Vertex | undefined => {
+const addLinkedVertex = (parent: Vertex, names: number[]): Vertex | undefined => {
   return (function setNext(previous?: Vertex) {
     if (!previous) return
     if (!names.length) return (previous.left = previous.name === parent.name ? undefined : parent)
@@ -32,23 +32,26 @@ const printTable = <T extends object | any[]>(res: T, msg = ConsoleMessages.G_AR
   console.table(res)
 }
 
-const fillGap = ({ G }: MFO) => {
-  for (let i = 1; i < G.length; i++) if (G[i].vertex - G[i - 1].vertex !== 1) G.splice(i, 0, { linked: [], vertex: G[i - 1].vertex + 1 })
+const fillGap = ({ main }: MFO) => {
+  for (let i = 1; i < main.length; i++)
+    if (main[i].vertex - main[i - 1].vertex !== 1) main.splice(i, 0, { linked: [], vertex: main[i - 1].vertex + 1 })
 }
 
-const addVertex = ({ G, P }: MFO): void => {
-  const generalLinked = G.map(({ linked }) => linked).flat()
-  if (!isCorrectInputs({ G, P }, generalLinked.length)) throw new Error('invalid input!!!')
-  if (P.length !== G.length) fillGap({ G, P })
-  fillGraph({ G, P }, generalLinked)
+const convertToMFO = ({ main, additional }: MFO): void => {
+  const generalLinked = main.map(({ linked }) => linked).flat()
+  if (!isCorrectInputs({ main, additional }, generalLinked.length)) throw new Error('invalid input!!!')
+  if (additional.length !== main.length) fillGap({ main, additional })
+  fillVertexList({ main, additional }, generalLinked)
 }
 
-const fillGraph = ({ G, P }: MFO, generalLinked: number[]) => {
+const fillVertexList = ({ main, additional }: MFO, generalLinked: number[]) => {
   const graph: VertexList = new VertexList()
-  for (let i = 0; i < P.length; ++i) {
-    const isWrongLinked: boolean = !!(G[i].linked.length && G[i].linked.sort((a, b) => a - b).at(-1) !== generalLinked[P[i] - 1])
-    if (isWrongLinked) throw new Error(`wrong P array at index ${i}; elements ${G[i].linked.at(-1)} ${generalLinked[P[i] - 1]}`)
-    const newElement = new El(createVertex(G[i]))
+  for (let i = 0; i < additional.length; ++i) {
+    const isWrongLinked: boolean = !!(
+      main[i].linked.length && main[i].linked.sort((a, b) => a - b).at(-1) !== generalLinked[additional[i] - 1]
+    )
+    if (isWrongLinked) throw new Error(`wrong P array at index ${i}; elements ${main[i].linked.at(-1)} ${generalLinked[additional[i] - 1]}`)
+    const newElement = new El(createVertex(main[i]))
     graph.list.at(-1)?.addNext(newElement)
     graph.Add(newElement)
   }
@@ -56,12 +59,12 @@ const fillGraph = ({ G, P }: MFO, generalLinked: number[]) => {
   graph.ToInnerStringOutput()
 }
 
-const inputGManually = (res: MFO, count: number) => {
+const inputMainArrayManually = (res: MFO, count: number) => {
   for (let vertex = 1; vertex <= count; vertex++) {
     const linked: number[] = stringToArrNumber(prompt(`${MenuMessages.NAME_OF_VERTEX} ${vertex}: `)!)
     const newVertex: VertexType = { vertex, linked }
-    res.G.push(newVertex)
+    res.main.push(newVertex)
   }
 }
 
-export { addVertex, printTable, stringToArrNumber, inputGManually }
+export { convertToMFO, printTable, stringToArrNumber, inputMainArrayManually }
