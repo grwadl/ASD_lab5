@@ -37,14 +37,17 @@ const fillGap = ({ G }: MFO) => {
 }
 
 const addVertex = ({ G, P }: MFO): void => {
-  const graph: VertexList = new VertexList()
   const generalLinked = G.map(({ linked }) => linked).flat()
   if (!isCorrectInputs({ G, P }, generalLinked.length)) throw new Error('invalid input!!!')
   if (P.length !== G.length) fillGap({ G, P })
+  fillGraph({ G, P }, generalLinked)
+}
 
-  for (let i = 0, k = 0; k < P.length; ++i, ++k) {
-    const isWrongLinked: boolean = !!(G[i].linked.length && G[i].linked.sort((a, b) => a - b).at(-1) !== generalLinked[P[k] - 1])
-    if (isWrongLinked) throw new Error(`wrong P array at index ${i}; elements ${G[i].linked.at(-1)} ${generalLinked[P[k] - 1]}`)
+const fillGraph = ({ G, P }: MFO, generalLinked: number[]) => {
+  const graph: VertexList = new VertexList()
+  for (let i = 0; i < P.length; ++i) {
+    const isWrongLinked: boolean = !!(G[i].linked.length && G[i].linked.sort((a, b) => a - b).at(-1) !== generalLinked[P[i] - 1])
+    if (isWrongLinked) throw new Error(`wrong P array at index ${i}; elements ${G[i].linked.at(-1)} ${generalLinked[P[i] - 1]}`)
     const newElement = new El(createVertex(G[i]))
     graph.list.at(-1)?.addNext(newElement)
     graph.Add(newElement)

@@ -20,7 +20,7 @@ const inputManually = (): void => {
   const res: MFO = { G: [], P: [] }
   inputGManually(res, count)
   printTable(res.G)
-  res.P = stringToArrNumber(prompt(MenuMessages.P_ARAY))
+  res.P = stringToArrNumber(prompt(MenuMessages.P_ARRAY))
   printTable(res.P, ConsoleMessages.P_ARRAY)
   addVertex(res)
 }
